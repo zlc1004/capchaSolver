@@ -225,57 +225,57 @@ def train(opt, show_number = 2, amp=False):
             optimizer.step()
         loss_avg.add(cost)
 
-        # validation part
-        if (i % opt.valInterval == 0) and (i!=0):
-            print('training time: ', time.time()-t1)
-            t1=time.time()
-            elapsed_time = time.time() - start_time
-            # for log
-            with open(f'./saved_models/{opt.experiment_name}/log_train.txt', 'a', encoding="utf8") as log:
-                model.eval()
-                with torch.no_grad():
-                    valid_loss, current_accuracy, current_norm_ED, preds, confidence_score, labels,\
-                    infer_time, length_of_data = validation(model, criterion, valid_loader, converter, opt, device)
-                model.train()
+        # # validation part
+        # if (i % opt.valInterval == 0) and (i!=0):
+        #     print('training time: ', time.time()-t1)
+        #     t1=time.time()
+        #     elapsed_time = time.time() - start_time
+        #     # for log
+        #     with open(f'./saved_models/{opt.experiment_name}/log_train.txt', 'a', encoding="utf8") as log:
+        #         model.eval()
+        #         with torch.no_grad():
+        #             valid_loss, current_accuracy, current_norm_ED, preds, confidence_score, labels,\
+        #             infer_time, length_of_data = validation(model, criterion, valid_loader, converter, opt, device)
+        #         model.train()
 
-                # training loss and validation loss
-                loss_log = f'[{i}/{opt.num_iter}] Train loss: {loss_avg.val():0.5f}, Valid loss: {valid_loss:0.5f}, Elapsed_time: {elapsed_time:0.5f}'
-                loss_avg.reset()
+        #         # training loss and validation loss
+        #         loss_log = f'[{i}/{opt.num_iter}] Train loss: {loss_avg.val():0.5f}, Valid loss: {valid_loss:0.5f}, Elapsed_time: {elapsed_time:0.5f}'
+        #         loss_avg.reset()
 
-                current_model_log = f'{"Current_accuracy":17s}: {current_accuracy:0.3f}, {"Current_norm_ED":17s}: {current_norm_ED:0.4f}'
+        #         current_model_log = f'{"Current_accuracy":17s}: {current_accuracy:0.3f}, {"Current_norm_ED":17s}: {current_norm_ED:0.4f}'
 
-                # keep best accuracy model (on valid dataset)
-                if current_accuracy > best_accuracy:
-                    best_accuracy = current_accuracy
-                    torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/best_accuracy.pth')
-                if current_norm_ED > best_norm_ED:
-                    best_norm_ED = current_norm_ED
-                    torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/best_norm_ED.pth')
-                best_model_log = f'{"Best_accuracy":17s}: {best_accuracy:0.3f}, {"Best_norm_ED":17s}: {best_norm_ED:0.4f}'
+        #         # keep best accuracy model (on valid dataset)
+        #         if current_accuracy > best_accuracy:
+        #             best_accuracy = current_accuracy
+        #             torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/best_accuracy.pth')
+        #         if current_norm_ED > best_norm_ED:
+        #             best_norm_ED = current_norm_ED
+        #             torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/best_norm_ED.pth')
+        #         best_model_log = f'{"Best_accuracy":17s}: {best_accuracy:0.3f}, {"Best_norm_ED":17s}: {best_norm_ED:0.4f}'
 
-                loss_model_log = f'{loss_log}\n{current_model_log}\n{best_model_log}'
-                print(loss_model_log)
-                log.write(loss_model_log + '\n')
+        #         loss_model_log = f'{loss_log}\n{current_model_log}\n{best_model_log}'
+        #         print(loss_model_log)
+        #         log.write(loss_model_log + '\n')
 
-                # show some predicted results
-                dashed_line = '-' * 80
-                head = f'{"Ground Truth":25s} | {"Prediction":25s} | Confidence Score & T/F'
-                predicted_result_log = f'{dashed_line}\n{head}\n{dashed_line}\n'
+        #         # show some predicted results
+        #         dashed_line = '-' * 80
+        #         head = f'{"Ground Truth":25s} | {"Prediction":25s} | Confidence Score & T/F'
+        #         predicted_result_log = f'{dashed_line}\n{head}\n{dashed_line}\n'
                 
-                #show_number = min(show_number, len(labels))
+        #         #show_number = min(show_number, len(labels))
                 
-                start = random.randint(0,len(labels) - show_number )    
-                for gt, pred, confidence in zip(labels[start:start+show_number], preds[start:start+show_number], confidence_score[start:start+show_number]):
-                    if 'Attn' in opt.Prediction:
-                        gt = gt[:gt.find('[s]')]
-                        pred = pred[:pred.find('[s]')]
+        #         start = random.randint(0,len(labels) - show_number )    
+        #         for gt, pred, confidence in zip(labels[start:start+show_number], preds[start:start+show_number], confidence_score[start:start+show_number]):
+        #             if 'Attn' in opt.Prediction:
+        #                 gt = gt[:gt.find('[s]')]
+        #                 pred = pred[:pred.find('[s]')]
 
-                    predicted_result_log += f'{gt:25s} | {pred:25s} | {confidence:0.4f}\t{str(pred == gt)}\n'
-                predicted_result_log += f'{dashed_line}'
-                print(predicted_result_log)
-                log.write(predicted_result_log + '\n')
-                print('validation time: ', time.time()-t1)
-                t1=time.time()
+        #             predicted_result_log += f'{gt:25s} | {pred:25s} | {confidence:0.4f}\t{str(pred == gt)}\n'
+        #         predicted_result_log += f'{dashed_line}'
+        #         print(predicted_result_log)
+        #         log.write(predicted_result_log + '\n')
+        #         print('validation time: ', time.time()-t1)
+        #         t1=time.time()
         # save model per 1e+4 iter.
         if (i + 1) % 1e+4 == 0:
             torch.save(
