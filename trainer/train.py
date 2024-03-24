@@ -280,6 +280,8 @@ def train(opt, show_number = 2, amp=False):
 
         if i == opt.num_iter:
             print('end the training')
+            torch.save(
+                model.state_dict(), f'./saved_models/{opt.experiment_name}/final_iter_{i+1}.pth')
             sys.exit()
         i += 1
         prog.update(1)
