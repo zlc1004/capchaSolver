@@ -12,8 +12,8 @@ import torch.optim as optim
 import torch.utils.data
 from torch.cuda.amp import autocast, GradScaler
 import numpy as np
-import torch_xla
-import torch_xla.core.xla_model as xm
+# import torch_xla
+# import torch_xla.core.xla_model as xm
 from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from model import Model
@@ -34,7 +34,7 @@ def count_parameters(model):
     return total_params
 
 def train(opt, show_number = 2, amp=False):
-    print(device.type())
+    print(device.type)
     """ dataset preparation """
     if not opt.data_filtering_off:
         print('Filtering the images containing characters which are not in opt.character')
