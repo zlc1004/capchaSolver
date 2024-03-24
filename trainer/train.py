@@ -12,12 +12,14 @@ import torch.optim as optim
 import torch.utils.data
 from torch.cuda.amp import autocast, GradScaler
 import numpy as np
-
+import torch_xla
+import torch_xla.core.xla_model as xm
 from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from model import Model
 from test__ import validation
-device = torch.device("mps" if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu'))
+# device = torch.device("mps" if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu'))
+device=xm.xla_device()
 
 def count_parameters(model):
     print("Modules, Parameters")
