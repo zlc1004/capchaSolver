@@ -18,8 +18,8 @@ from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from model import Model
 from test__ import validation
-# device = torch.device("mps" if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu'))
-device=xm.xla_device()
+device = torch.device("mps" if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu'))
+# device=xm.xla_device()
 
 def count_parameters(model):
     print("Modules, Parameters")
@@ -34,6 +34,7 @@ def count_parameters(model):
     return total_params
 
 def train(opt, show_number = 2, amp=False):
+    print(device.type())
     """ dataset preparation """
     if not opt.data_filtering_off:
         print('Filtering the images containing characters which are not in opt.character')
