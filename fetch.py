@@ -2,7 +2,7 @@ from claptcha import Claptcha
 from PIL import Image
 import random,tqdm
 def randomString():
-    rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(5))
+    rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(random.randint(4, 8)))
     return "".join(rndLetters)
 
 for i in tqdm.tqdm(range(10000)):

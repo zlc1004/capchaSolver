@@ -1,4 +1,4 @@
-CHECKS=5
+CHECKS=10
 
 
 from claptcha import Claptcha
@@ -6,7 +6,7 @@ import easyocr
 from PIL import Image
 import random,tqdm
 def randomString():
-    rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(5))
+    rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(random.randint(4, 8)))
     return "".join(rndLetters)
 reader = easyocr.Reader(['en'],recog_network="iter_10000") # this needs to run only once to load the model into memory
 out=""
@@ -17,13 +17,18 @@ for i in tqdm.tqdm(range(CHECKS)):
     # c.write(""+string+'.png')
     c.write("./valid/"+string+'.png')
     result = reader.readtext("./valid/"+string+'.png')
-    out+=(result[0][1])
+    try:
+        text = result[0][1]
+    except IndexError:
+        text="error"
+        print(result)
+    out+=text
     out+="\t"
     out+=(string)
     out+="\t"
-    out+=str(string==result[0][1])
+    out+=str(string==text)
     out+="\n"
-    if string==result[0][1]:
+    if string==text:
         correct+=1
 print(out)
 print("Accuracy: ",(correct/CHECKS)*100,"%")
