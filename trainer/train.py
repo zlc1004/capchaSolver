@@ -2,7 +2,7 @@ import os
 # os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import sys
-import time
+import time,tqdm
 import random
 import torch
 import torch.backends.cudnn as cudnn
@@ -16,7 +16,7 @@ import numpy as np
 from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from model import Model
-from test import validation
+from test__ import validation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def count_parameters(model):
@@ -173,7 +173,7 @@ def train(opt, show_number = 2, amp=False):
 
     scaler = GradScaler()
     t1= time.time()
-        
+    prog=tqdm.tqdm(range(i, opt.num_iter))
     while(True):
         # train part
         optimizer.zero_grad(set_to_none=True)
@@ -282,3 +282,4 @@ def train(opt, show_number = 2, amp=False):
             print('end the training')
             sys.exit()
         i += 1
+        prog.update(1)
