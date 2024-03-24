@@ -7,7 +7,7 @@ def randomString():
     return "".join(rndLetters)
 reader = easyocr.Reader(['en'],recog_network="iter_10000") # this needs to run only once to load the model into memory
 out=""
-for i in tqdm.tqdm(range(10)):
+for i in tqdm.tqdm(range(25)):
     for i in (range(1)):
         string=randomString()
         c = Claptcha(string, "Consolas.ttf", noise=0.1)
