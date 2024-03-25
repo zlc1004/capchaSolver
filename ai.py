@@ -1,4 +1,4 @@
-CHECKS=1000
+CHECKS=100
 
 
 from claptcha import Claptcha
@@ -8,7 +8,7 @@ import random,tqdm
 def randomString():
     rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(random.randint(4, 8)))
     return "".join(rndLetters)
-reader = easyocr.Reader(['en'],recog_network="iter_20000") # this needs to run only once to load the model into memory
+reader = easyocr.Reader(['en'],recog_network="iter_50000",user_network_directory="./models") # this needs to run only once to load the model into memory
 out=""
 correct=0
 for i in tqdm.tqdm(range(CHECKS)):
