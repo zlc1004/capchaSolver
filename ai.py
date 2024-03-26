@@ -1,5 +1,4 @@
-CHECKS=10
-
+CHECKS=1
 
 from betterClaptcha import Claptcha
 import easyocr
@@ -15,9 +14,10 @@ out=""
 correct=0
 for i in tqdm.tqdm(range(CHECKS)):
     string=randomString()
-    c = Claptcha(string, "Consolas.ttf", noise=random.random()/3,lines=random.randint(2,4))#,color=randomColor()
+    c = Claptcha(string, "Consolas.ttf",size=(int(200*1.25), int(80*1.25)), noise=random.random()/3,lines=random.randint(1,3),color=randomColor())
     # c.write(""+string+'.png')
     c.write("./valid/"+string+'.png')
+    # Image.open("./valid/"+string+'.png').convert('L').convert('RGB').save("./valid/"+string+'.gray.png')
     result = reader.readtext("./valid/"+string+'.png')
     try:
         text = result[0][1]
