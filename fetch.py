@@ -10,5 +10,7 @@ def randomString():
 
 for i in tqdm.tqdm(range(10000)):
     string=randomString()
-    c = Claptcha(string, "Consolas.ttf",size=(int(200*1), int(80*1)), noise=random.random()/3,lines=random.randint(1,3),color=randomColor())
-    c.write("/Users/lucaszhang/captchSolver/trainer/all_data/en_train_filtered/"+string+'.png')
+    int1=random.randint(1,3)
+    for k in range(int1):
+        c = Claptcha(string, "Consolas.ttf",size=(int(200*1), int(80*1)), noise=random.random()/3,lines=random.randint(1,2),color=randomColor())
+        c.write("/Users/lucaszhang/captchSolver/trainer/all_data/en_train_filtered/"+string+'.'+str(k)+'.png')

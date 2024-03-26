@@ -24,7 +24,7 @@ class Claptcha(claptcha.Claptcha):
 
             # Line width modifier was chosen as an educated guess
             # based on default image area.
-            l_width = round((w * h)**0.5 * 2.284e-2)
+            l_width = round(((w * h)**0.5 * 2.284e-2)*0.8)
 
             # Draw
             l_draw.line(((x1, y1), (x2, y2)), fill=(0, 0, 0, 255), width=l_width)
