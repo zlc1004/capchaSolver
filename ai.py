@@ -5,11 +5,12 @@ import easyocr
 from PIL import Image
 import random,tqdm
 def randomColor():
-    return (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+    # return (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+    return (255,255,255)
 def randomString():
     rndLetters = (random.choice("qwertyuiopasdfghjklzxcvbnm1234567890") for _ in range(random.randint(4, 8)))
     return "".join(rndLetters)
-reader = easyocr.Reader(['en'],download_enabled=False,recog_network="color_iter_15000",user_network_directory="./models/net",model_storage_directory="./models/models") # this needs to run only once to load the model into memory
+reader = easyocr.Reader(['en'],download_enabled=False,recog_network="iter_50000",user_network_directory="./models/net",model_storage_directory="./models/models") # this needs to run only once to load the model into memory
 out=""
 correct=0
 for i in tqdm.tqdm(range(CHECKS)):
