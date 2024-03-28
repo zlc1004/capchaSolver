@@ -2,7 +2,7 @@ import os
 # os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import sys
-import time,tqdm
+import time,tqdm.notebook as tqdm
 import random
 import torch
 import torch.backends.cudnn as cudnn
@@ -33,7 +33,36 @@ def count_parameters(model):
     print(f"Total Trainable Params: {total_params}")
     return total_params
 
-def train(opt, show_number = 2, amp=False):
+def new_model(opt):
+    model = Model(opt)
+    print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
+          opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
+          opt.SequenceModeling, opt.Prediction)
+
+    for name, param in model.named_parameters():
+        if 'localization_fc2' in name:
+            print(f'Skip {name} as it is already initialized')
+            continue
+        try:
+            if 'bias' in name:
+                init.constant_(param, 0.0)
+            elif 'weight' in name:
+                init.kaiming_normal_(param)
+        except Exception as e:  # for batchnorm.
+            if 'weight' in name:
+                param.data.fill_(1)
+            continue
+    model = torch.nn.DataParallel(model).to(device)
+    return model
+
+def load_model(opt,path):
+    model = Model(opt)
+    model.load_state_dict(torch.load(path))
+    model.eval()
+    return model
+
+
+def train(opt,model, show_number = 2, amp=False):
     print(device.type)
     """ dataset preparation """
     if not opt.data_filtering_off:
@@ -66,47 +95,8 @@ def train(opt, show_number = 2, amp=False):
 
     if opt.rgb:
         opt.input_channel = 3
-    model = Model(opt)
-    print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
-          opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
-          opt.SequenceModeling, opt.Prediction)
+    # load model from checkpoint
 
-    if opt.saved_model != '':
-        pretrained_dict = torch.load(opt.saved_model)
-        if opt.new_prediction:
-            model.Prediction = nn.Linear(model.SequenceModeling_output, len(pretrained_dict['module.Prediction.weight']))  
-        
-        model = torch.nn.DataParallel(model).to(device) 
-        print(f'loading pretrained model from {opt.saved_model}')
-        if opt.FT:
-            model.load_state_dict(pretrained_dict, strict=False)
-        else:
-            model.load_state_dict(pretrained_dict)
-        if opt.new_prediction:
-            model.module.Prediction = nn.Linear(model.module.SequenceModeling_output, opt.num_class)  
-            for name, param in model.module.Prediction.named_parameters():
-                if 'bias' in name:
-                    init.constant_(param, 0.0)
-                elif 'weight' in name:
-                    init.kaiming_normal_(param)
-            model = model.to(device) 
-    else:
-        # weight initialization
-        for name, param in model.named_parameters():
-            if 'localization_fc2' in name:
-                print(f'Skip {name} as it is already initialized')
-                continue
-            try:
-                if 'bias' in name:
-                    init.constant_(param, 0.0)
-                elif 'weight' in name:
-                    init.kaiming_normal_(param)
-            except Exception as e:  # for batchnorm.
-                if 'weight' in name:
-                    param.data.fill_(1)
-                continue
-        model = torch.nn.DataParallel(model).to(device)
-    
     model.train() 
     print("Model:")
     print(model)
@@ -284,7 +274,7 @@ def train(opt, show_number = 2, amp=False):
         if i == opt.num_iter:
             print('end the training')
             torch.save(
-                model.state_dict(), f'./saved_models/{opt.experiment_name}/final_iter_{i+1}.pth')
-            sys.exit()
+                model.state_dict(), f'./saved_models/{opt.experiment_name}/final_iter_{i}.pth')
+            print(f'final model saved to ./saved_models/{opt.experiment_name}/final_iter_{i}.pth')
         i += 1
         prog.update(1)
