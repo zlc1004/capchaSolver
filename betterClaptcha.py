@@ -36,14 +36,14 @@ class Claptcha(claptcha.Claptcha):
             # Paste onto image
             image.paste(l_image, (0, 0), l_image)
     def blendWhite(self,color,times):
-        return tuple(map(lambda x: sum(([x]*times)+([255]*(255-times)))//255,color))
+        return tuple(map(lambda x: sum(([x]*times)+([255]*(100-times)))//100,color))
     def _whiteNoise(self, size):
         """Generate white noise and merge it with given Image object."""
         color=self.baseColor
         if self.noise > 0.003921569:  # 1./255.
             # noise = noise*255
             w, h = size
-            pixel = (lambda noise: round(255 * random.uniform(1-noise, 1)))
+            pixel = (lambda noise: round(100 * random.uniform(1-noise, 1)))
             n_image = Image.new('RGB', size, (0, 0, 0))
             tmp = list(map(lambda _: pixel(self.noise),
                             [0] * w * h))
