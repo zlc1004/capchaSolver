@@ -34,6 +34,14 @@ def count_parameters(model):
     return total_params
 
 def new_model(opt):
+    opt.select_data = opt.select_data.split('-')
+    opt.batch_ratio = opt.batch_ratio.split('-')
+    """ model configuration """
+    if 'CTC' in opt.Prediction:
+        converter = CTCLabelConverter(opt.character)
+    else:
+        converter = AttnLabelConverter(opt.character)
+    opt.num_class = len(converter.character)
     model = Model(opt)
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
           opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
@@ -56,9 +64,24 @@ def new_model(opt):
     return model
 
 def load_model(opt,path):
-    model = Model(opt)
-    model.load_state_dict(torch.load(path))
-    model.eval()
+    pretrained_dict = torch.load(opt.saved_model)
+    if opt.new_prediction:
+        model.Prediction = nn.Linear(model.SequenceModeling_output, len(pretrained_dict['module.Prediction.weight']))  
+    
+    model = torch.nn.DataParallel(model).to(device) 
+    print(f'loading pretrained model from {opt.saved_model}')
+    if opt.FT:
+        model.load_state_dict(pretrained_dict, strict=False)
+    else:
+        model.load_state_dict(pretrained_dict)
+    if opt.new_prediction:
+        model.module.Prediction = nn.Linear(model.module.SequenceModeling_output, opt.num_class)  
+        for name, param in model.module.Prediction.named_parameters():
+            if 'bias' in name:
+                init.constant_(param, 0.0)
+            elif 'weight' in name:
+                init.kaiming_normal_(param)
+        model = model.to(device)
     return model
 
 
@@ -278,3 +301,4 @@ def train(opt,model, show_number = 2, amp=False):
             print(f'final model saved to ./saved_models/{opt.experiment_name}/final_iter_{i}.pth')
         i += 1
         prog.update(1)
+        # make 
