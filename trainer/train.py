@@ -64,7 +64,20 @@ def new_model(opt):
     return model
 
 def load_model(opt,path):
-    pretrained_dict = torch.load(opt.saved_model)
+    opt.select_data = opt.select_data.split('-')
+    opt.batch_ratio = opt.batch_ratio.split('-')
+    """ model configuration """
+    if 'CTC' in opt.Prediction:
+        converter = CTCLabelConverter(opt.character)
+    else:
+        converter = AttnLabelConverter(opt.character)
+    opt.num_class = len(converter.character)
+    model = Model(opt)
+    print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
+          opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
+          opt.SequenceModeling, opt.Prediction)
+
+    pretrained_dict = torch.load(path)
     if opt.new_prediction:
         model.Prediction = nn.Linear(model.SequenceModeling_output, len(pretrained_dict['module.Prediction.weight']))  
     
@@ -92,8 +105,8 @@ def train(opt,model, show_number = 2, amp=False):
         print('Filtering the images containing characters which are not in opt.character')
         print('Filtering the images whose label is longer than opt.batch_max_length')
 
-    opt.select_data = opt.select_data.split('-')
-    opt.batch_ratio = opt.batch_ratio.split('-')
+    # opt.select_data = opt.select_data.split('-')
+    # opt.batch_ratio = opt.batch_ratio.split('-')
     train_dataset = Batch_Balanced_Dataset(opt)
 
     log = open(f'./saved_models/{opt.experiment_name}/log_dataset.txt', 'a', encoding="utf8")
@@ -114,7 +127,6 @@ def train(opt,model, show_number = 2, amp=False):
         converter = CTCLabelConverter(opt.character)
     else:
         converter = AttnLabelConverter(opt.character)
-    opt.num_class = len(converter.character)
 
     if opt.rgb:
         opt.input_channel = 3
